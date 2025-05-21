@@ -6,6 +6,11 @@ import jwt, { Secret, SignOptions } from "jsonwebtoken";
 
 const userRepository = AppDataSource.getRepository(User);
 
+interface JwtPayload {
+  userId: number;
+  role: UserRole;
+}
+
 export const register = async (req: Request, res: Response) => {
   try {
     let { name, email, password } = req.body;
@@ -39,12 +44,9 @@ export const register = async (req: Request, res: Response) => {
     await userRepository.save(user);
     // Generate JWT
     const secret: Secret = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+    const payload: JwtPayload = { userId: user.id, role: user.role };
     const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "24h" };
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      secret,
-      options
-    );
+    const token = jwt.sign(payload, secret, options);
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error: any) {
     console.error("Registration error:", error);
@@ -78,12 +80,9 @@ export const login = async (req: Request, res: Response) => {
     }
     // Generate JWT
     const secret: Secret = process.env.JWT_SECRET || "your-super-secret-jwt-key";
+    const payload: JwtPayload = { userId: user.id, role: user.role };
     const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "24h" };
-    const token = jwt.sign(
-      { userId: user.id, role: user.role },
-      secret,
-      options
-    );
+    const token = jwt.sign(payload, secret, options);
     console.log('Generated token for user:', { id: user.id, role: user.role });
     res.json({ token });
   } catch (error: any) {

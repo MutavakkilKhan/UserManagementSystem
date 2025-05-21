@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import {
   Container,
@@ -7,6 +7,7 @@ import {
   Button,
   Typography,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -17,22 +18,35 @@ const Register = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, loading, error: authError } = useAuth();
+
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
 
-    // Frontend Gmail validation
-    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
-    if (!gmailRegex.test(email)) {
-      setError('Only valid Gmail addresses are allowed.');
+    // Name validation
+    if (!name || name.trim().length < 2) {
+      setError('Name must be at least 2 characters long');
       return;
     }
-    // Password length validation
+
+    // Email validation
+    const gmailRegex = /^[a-zA-Z0-9._%+-]+@gmail\.com$/;
+    if (!gmailRegex.test(email)) {
+      setError('Only valid Gmail addresses are allowed');
+      return;
+    }
+
+    // Password validation
     if (password.length < 6) {
-      setError('Password must be at least 6 characters.');
+      setError('Password must be at least 6 characters long');
       return;
     }
 
@@ -113,6 +127,8 @@ const Register = () => {
               onChange={(e) => setName(e.target.value)}
               margin="normal"
               required
+              disabled={loading}
+              error={!!error}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -129,6 +145,9 @@ const Register = () => {
               onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
+              disabled={loading}
+              error={!!error}
+              helperText="Only Gmail addresses are allowed"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -145,6 +164,9 @@ const Register = () => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              disabled={loading}
+              error={!!error}
+              helperText="Must be at least 6 characters long"
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -157,6 +179,7 @@ const Register = () => {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={loading}
               sx={{
                 mt: 4,
                 mb: 2,
@@ -167,24 +190,19 @@ const Register = () => {
                 },
               }}
             >
-              Register
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Register'
+              )}
             </Button>
-          </form>
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#666' }}>
+            <Typography align="center" sx={{ mt: 2 }}>
               Already have an account?{' '}
-              <Link
-                to="/login"
-                style={{
-                  textDecoration: 'none',
-                  color: '#1a237e',
-                  fontWeight: 'bold',
-                }}
-              >
-                Login here
+              <Link to="/login" style={{ color: '#1a237e', textDecoration: 'none' }}>
+                Sign in here
               </Link>
             </Typography>
-          </Box>
+          </form>
         </Paper>
       </Container>
     </Box>

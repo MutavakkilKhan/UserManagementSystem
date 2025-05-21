@@ -18,6 +18,8 @@ import {
   DialogActions,
   MenuItem,
   TextField,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -27,6 +29,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 const Dashboard = () => {
   const [software, setSoftware] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [requestLoading, setRequestLoading] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
   const [open, setOpen] = useState(false);
@@ -42,11 +46,15 @@ const Dashboard = () => {
 
   const fetchSoftware = async () => {
     try {
+      setLoading(true);
+      setError('');
       const response = await axios.get(`${API_BASE_URL}/api/software`);
       setSoftware(response.data);
     } catch (error) {
-      setError('Error fetching software list');
+      setError(error.response?.data?.message || 'Error fetching software list');
       console.error('Error:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,6 +71,8 @@ const Dashboard = () => {
     e.preventDefault();
     setRequestMsg('');
     setRequestErr('');
+    setRequestLoading(true);
+
     try {
       await axios.post(`${API_BASE_URL}/api/access-request`, {
         softwareId: selectedSoftware.id,
@@ -70,13 +80,17 @@ const Dashboard = () => {
         reason,
       });
       setRequestMsg('Access request submitted successfully!');
-      setOpen(false);
+      setTimeout(() => {
+        setOpen(false);
+      }, 1500);
     } catch (error) {
       if (error.response?.data?.message === 'Access request already pending') {
         setRequestErr('You already have a pending request for this software.');
       } else {
-        setRequestErr('Error submitting access request');
+        setRequestErr(error.response?.data?.message || 'Error submitting access request');
       }
+    } finally {
+      setRequestLoading(false);
     }
   };
 
@@ -84,6 +98,22 @@ const Dashboard = () => {
     logout();
     navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: 'white' }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -127,9 +157,9 @@ const Dashboard = () => {
             Available Software
           </Typography>
           {error && (
-            <Typography color="error" gutterBottom>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
-            </Typography>
+            </Alert>
           )}
           <Grid container spacing={4} justifyContent="center" sx={{ width: '100%' }}>
             {software.map((item) => (
@@ -168,7 +198,7 @@ const Dashboard = () => {
           </Grid>
         </Box>
       </Container>
-      <Dialog open={open} onClose={() => setOpen(false)}>
+      <Dialog open={open} onClose={() => !requestLoading && setOpen(false)}>
         <DialogTitle>Request Access: {selectedSoftware?.name}</DialogTitle>
         <form onSubmit={handleSubmitRequest}>
           <DialogContent>
@@ -178,6 +208,7 @@ const Dashboard = () => {
               value={accessType}
               onChange={(e) => setAccessType(e.target.value)}
               fullWidth
+              disabled={requestLoading}
               sx={{ mb: 2 }}
             >
               <MenuItem value="read">Read</MenuItem>
@@ -192,14 +223,27 @@ const Dashboard = () => {
               fullWidth
               multiline
               rows={3}
+              disabled={requestLoading}
               sx={{ mb: 2 }}
             />
-            {requestErr && <Typography color="error">{requestErr}</Typography>}
-            {requestMsg && <Typography color="success.main">{requestMsg}</Typography>}
+            {requestErr && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {requestErr}
+              </Alert>
+            )}
+            {requestMsg && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {requestMsg}
+              </Alert>
+            )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setOpen(false)}>Cancel</Button>
-            <Button type="submit" variant="contained">Submit</Button>
+            <Button onClick={() => setOpen(false)} disabled={requestLoading}>
+              Cancel
+            </Button>
+            <Button type="submit" variant="contained" disabled={requestLoading}>
+              {requestLoading ? <CircularProgress size={24} /> : 'Submit'}
+            </Button>
           </DialogActions>
         </form>
       </Dialog>

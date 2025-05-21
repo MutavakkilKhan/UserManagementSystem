@@ -4,17 +4,17 @@ import { AccessRequest } from "./AccessRequest";
 @Entity()
 export class Software {
   @PrimaryGeneratedColumn()
-  id: number;
+  id!: number;
 
   @Column()
-  name: string;
+  name!: string;
 
   @Column()
-  description: string;
+  description!: string;
 
   @Column("simple-array")
-  accessLevels: string[];
+  accessLevels!: string[];
 
   @OneToMany(() => AccessRequest, (accessRequest) => accessRequest.software)
-  accessRequests: AccessRequest[];
+  accessRequests!: AccessRequest[];
 } 

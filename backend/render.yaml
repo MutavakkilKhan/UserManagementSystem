@@ -1,0 +1,46 @@
+services:
+  # Frontend Service
+  - type: web
+    name: frontend
+    env: static
+    buildCommand: cd frontend && npm install && npm run build
+    staticPublishPath: frontend/dist
+    envVars:
+      - key: VITE_API_BASE_URL
+        value: https://backend.onrender.com  # Replace with your actual backend URL
+
+  # Backend Service
+  - type: web
+    name: backend
+    env: node
+    buildCommand: cd backend && npm install
+    startCommand: cd backend && npm start
+    envVars:
+      - key: DB_HOST
+        value: dpg-d0n0tradbo4c73eftge0-a
+      - key: DB_PORT
+        value: 5432
+      - key: DB_USERNAME
+        value: postgres_backend_hkvq_user
+      - key: DB_PASSWORD
+        value: jXs9PRKrNQeAXbtcQE1lYwDDw7cTTVli
+      - key: DB_DATABASE
+        value: uam-system-db
+      - key: JWT_SECRET
+        value: your-secure-jwt-secret-key  # Replace with a secure key
+      - key: ADMIN_EMAIL
+        value: admin@example.com  # Replace with your admin email
+      - key: ADMIN_NAME
+        value: Admin
+      - key: ADMIN_PASSWORD
+        value: your-secure-admin-password  # Replace with a secure password
+      - key: MANAGER_EMAIL
+        value: manager@example.com  # Replace with your manager email
+      - key: MANAGER_NAME
+        value: Manager
+      - key: MANAGER_PASSWORD
+        value: your-secure-manager-password  # Replace with a secure password
+      - key: PORT
+        value: 3000
+      - key: ALLOWED_ORIGINS
+        value: https://frontend.onrender.com  # Replace with your frontend URL 

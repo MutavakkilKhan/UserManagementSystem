@@ -7,13 +7,13 @@ services:
     staticPublishPath: frontend/dist
     envVars:
       - key: VITE_API_BASE_URL
-        value: https://backend.onrender.com  # Replace with your actual backend URL
+        value: https://user-management-system-backend.onrender.com
 
   # Backend Service
   - type: web
     name: backend
     env: node
-    buildCommand: cd backend && npm install
+    buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && npm start
     envVars:
       - key: DB_HOST
@@ -27,20 +27,20 @@ services:
       - key: DB_DATABASE
         value: uam-system-db
       - key: JWT_SECRET
-        value: your-secure-jwt-secret-key  # Replace with a secure key
+        value: UAM_System_Secret_Key_2024_Secure_JWT_Token
       - key: ADMIN_EMAIL
-        value: admin@example.com  # Replace with your admin email
+        value: admin@uam.com
       - key: ADMIN_NAME
-        value: Admin
+        value: System Admin
       - key: ADMIN_PASSWORD
-        value: your-secure-admin-password  # Replace with a secure password
+        value: Admin@UAM2024
       - key: MANAGER_EMAIL
-        value: manager@example.com  # Replace with your manager email
+        value: manager@uam.com
       - key: MANAGER_NAME
-        value: Manager
+        value: System Manager
       - key: MANAGER_PASSWORD
-        value: your-secure-manager-password  # Replace with a secure password
+        value: Manager@UAM2024
       - key: PORT
         value: 3000
       - key: ALLOWED_ORIGINS
-        value: https://frontend.onrender.com  # Replace with your frontend URL 
+        value: https://user-management-system-frontend.onrender.com 

@@ -45,7 +45,9 @@ export const register = async (req: Request, res: Response) => {
     // Generate JWT
     const secret: Secret = process.env.JWT_SECRET || "your-super-secret-jwt-key";
     const payload: JwtPayload = { userId: user.id, role: user.role };
-    const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "24h" };
+    const options: SignOptions = { 
+      expiresIn: (process.env.JWT_EXPIRES_IN || "24h") as jwt.SignOptions["expiresIn"]
+    };
     const token = jwt.sign(payload, secret, options);
     res.status(201).json({ message: "User registered successfully", token });
   } catch (error: any) {
@@ -81,7 +83,9 @@ export const login = async (req: Request, res: Response) => {
     // Generate JWT
     const secret: Secret = process.env.JWT_SECRET || "your-super-secret-jwt-key";
     const payload: JwtPayload = { userId: user.id, role: user.role };
-    const options: SignOptions = { expiresIn: process.env.JWT_EXPIRES_IN || "24h" };
+    const options: SignOptions = { 
+      expiresIn: (process.env.JWT_EXPIRES_IN || "24h") as jwt.SignOptions["expiresIn"]
+    };
     const token = jwt.sign(payload, secret, options);
     console.log('Generated token for user:', { id: user.id, role: user.role });
     res.json({ token });

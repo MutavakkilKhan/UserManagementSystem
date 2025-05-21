@@ -16,6 +16,8 @@ import {
   Checkbox,
   FormControlLabel,
   FormGroup,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -34,6 +36,8 @@ const AdminDashboard = () => {
   const [managerMsg, setManagerMsg] = useState('');
   const [managerErr, setManagerErr] = useState('');
   const [accessLevels, setAccessLevels] = useState(["read", "write", "admin"]);
+  const [loading, setLoading] = useState(true);
+  const [submitting, setSubmitting] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -48,10 +52,14 @@ const AdminDashboard = () => {
 
   const fetchSoftware = async () => {
     try {
+      setLoading(true);
+      setError('');
       const response = await axios.get(`${API_BASE_URL}/api/software`);
       setSoftware(response.data);
     } catch (error) {
-      setError('Error fetching software list');
+      setError(error.response?.data?.message || 'Error fetching software list');
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -67,6 +75,8 @@ const AdminDashboard = () => {
     e.preventDefault();
     setError('');
     setSuccess('');
+    setSubmitting(true);
+
     try {
       await axios.post(`${API_BASE_URL}/api/software`, { name, description, accessLevels });
       setSuccess('Software created successfully!');
@@ -75,7 +85,9 @@ const AdminDashboard = () => {
       setAccessLevels(["read", "write", "admin"]);
       fetchSoftware();
     } catch (error) {
-      setError('Error creating software');
+      setError(error.response?.data?.message || 'Error creating software');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -83,6 +95,8 @@ const AdminDashboard = () => {
     e.preventDefault();
     setManagerMsg('');
     setManagerErr('');
+    setSubmitting(true);
+
     try {
       const res = await axios.patch(`${API_BASE_URL}/api/users/manager-email`, {
         email: managerEmail,
@@ -95,6 +109,8 @@ const AdminDashboard = () => {
       setManagerPassword('');
     } catch (err) {
       setManagerErr(err.response?.data?.message || 'Error updating manager');
+    } finally {
+      setSubmitting(false);
     }
   };
 
@@ -102,6 +118,22 @@ const AdminDashboard = () => {
     logout();
     navigate('/login');
   };
+
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: 'white' }} />
+      </Box>
+    );
+  }
 
   return (
     <Box
@@ -160,6 +192,7 @@ const AdminDashboard = () => {
               onChange={(e) => setName(e.target.value)}
               required
               fullWidth
+              disabled={submitting}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -168,6 +201,7 @@ const AdminDashboard = () => {
               onChange={(e) => setDescription(e.target.value)}
               required
               fullWidth
+              disabled={submitting}
               sx={{ mb: 2 }}
             />
             <FormGroup row sx={{ mb: 2, justifyContent: 'center' }}>
@@ -180,18 +214,32 @@ const AdminDashboard = () => {
                       onChange={() => handleAccessLevelChange(level)}
                       name={level}
                       color="primary"
+                      disabled={submitting}
                     />
                   }
                   label={level.charAt(0).toUpperCase() + level.slice(1)}
                 />
               ))}
             </FormGroup>
-            <Button type="submit" variant="contained" sx={{ fontWeight: 'bold', px: 4, py: 1.5 }}>
-              Create Software
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={submitting}
+              sx={{ fontWeight: 'bold', px: 4, py: 1.5 }}
+            >
+              {submitting ? <CircularProgress size={24} /> : 'Create Software'}
             </Button>
           </form>
-          {error && <Typography color="error" sx={{ mb: 2 }}>{error}</Typography>}
-          {success && <Typography color="success.main" sx={{ mb: 2 }}>{success}</Typography>}
+          {error && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {error}
+            </Alert>
+          )}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
         </Box>
         <Box
           sx={{
@@ -217,6 +265,7 @@ const AdminDashboard = () => {
               onChange={(e) => setManagerEmail(e.target.value)}
               required
               fullWidth
+              disabled={submitting}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -225,6 +274,7 @@ const AdminDashboard = () => {
               onChange={(e) => setManagerName(e.target.value)}
               required
               fullWidth
+              disabled={submitting}
               sx={{ mb: 2 }}
             />
             <TextField
@@ -234,14 +284,28 @@ const AdminDashboard = () => {
               onChange={(e) => setManagerPassword(e.target.value)}
               required
               fullWidth
+              disabled={submitting}
               sx={{ mb: 2 }}
             />
-            <Button type="submit" variant="contained" sx={{ fontWeight: 'bold', px: 4, py: 1.5 }}>
-              Update Manager
+            <Button
+              type="submit"
+              variant="contained"
+              disabled={submitting}
+              sx={{ fontWeight: 'bold', px: 4, py: 1.5 }}
+            >
+              {submitting ? <CircularProgress size={24} /> : 'Update Manager'}
             </Button>
           </form>
-          {managerErr && <Typography color="error" sx={{ mb: 2 }}>{managerErr}</Typography>}
-          {managerMsg && <Typography color="success.main" sx={{ mb: 2 }}>{managerMsg}</Typography>}
+          {managerErr && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {managerErr}
+            </Alert>
+          )}
+          {managerMsg && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {managerMsg}
+            </Alert>
+          )}
         </Box>
         <Box
           sx={{

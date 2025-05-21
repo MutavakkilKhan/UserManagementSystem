@@ -7,6 +7,7 @@ import {
   Button,
   Typography,
   Box,
+  CircularProgress,
 } from '@mui/material';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -16,12 +17,31 @@ const Login = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const navigate = useNavigate();
-  const { login, user } = useAuth();
+  const { login, user, loading, error: authError } = useAuth();
+
+  useEffect(() => {
+    if (authError) {
+      setError(authError);
+    }
+  }, [authError]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setSuccess('');
+
+    // Email validation
+    if (!email || !email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+
+    // Password validation
+    if (!password || password.length < 6) {
+      setError('Password must be at least 6 characters long');
+      return;
+    }
+
     const result = await login(email, password);
     if (result.success) {
       setSuccess('Login successful! Redirecting...');
@@ -111,6 +131,8 @@ const Login = () => {
               onChange={(e) => setEmail(e.target.value)}
               margin="normal"
               required
+              disabled={loading}
+              error={!!error}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -127,6 +149,8 @@ const Login = () => {
               onChange={(e) => setPassword(e.target.value)}
               margin="normal"
               required
+              disabled={loading}
+              error={!!error}
               sx={{
                 '& .MuiOutlinedInput-root': {
                   '&:hover fieldset': {
@@ -139,6 +163,7 @@ const Login = () => {
               type="submit"
               fullWidth
               variant="contained"
+              disabled={loading}
               sx={{ 
                 mt: 4,
                 mb: 2,
@@ -149,24 +174,19 @@ const Login = () => {
                 },
               }}
             >
-              Sign In
+              {loading ? (
+                <CircularProgress size={24} color="inherit" />
+              ) : (
+                'Sign In'
+              )}
             </Button>
-          </form>
-          <Box sx={{ mt: 3, textAlign: 'center' }}>
-            <Typography variant="body2" sx={{ color: '#666' }}>
+            <Typography align="center" sx={{ mt: 2 }}>
               Don't have an account?{' '}
-              <Link 
-                to="/register" 
-                style={{ 
-                  textDecoration: 'none',
-                  color: '#1a237e',
-                  fontWeight: 'bold',
-                }}
-              >
+              <Link to="/register" style={{ color: '#1a237e', textDecoration: 'none' }}>
                 Register here
               </Link>
             </Typography>
-          </Box>
+          </form>
         </Paper>
       </Container>
     </Box>

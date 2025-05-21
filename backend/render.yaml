@@ -1,46 +1,37 @@
 services:
-  # Frontend Service
   - type: web
-    name: frontend
-    env: static
-    buildCommand: cd frontend && npm install && npm run build
-    staticPublishPath: frontend/dist
-    envVars:
-      - key: VITE_API_BASE_URL
-        value: https://user-management-system-backend.onrender.com
-
-  # Backend Service
-  - type: web
-    name: backend
+    name: uam-system-backend
     env: node
     buildCommand: cd backend && npm install && npm run build
     startCommand: cd backend && npm start
     envVars:
+      - key: NODE_ENV
+        value: production
       - key: DB_HOST
-        value: dpg-d0n0tradbo4c73eftge0-a
+        value: dpg-cp3q5u8l6cac73c7v7vg-a
       - key: DB_PORT
         value: 5432
-      - key: DB_USERNAME
-        value: postgres_backend_hkvq_user
-      - key: DB_PASSWORD
-        value: jXs9PRKrNQeAXbtcQE1lYwDDw7cTTVli
       - key: DB_DATABASE
-        value: uam-system-db
+        value: postgres_backend_kfwx
+      - key: DB_USERNAME
+        value: postgres_backend_kfwx_user
+      - key: DB_PASSWORD
+        value: 13d9n6b8b6d1b2e1b1c0e7f1f1a1
       - key: JWT_SECRET
-        value: UAM_System_Secret_Key_2024_Secure_JWT_Token
+        value: your_super_secret_jwt_key
+      - key: JWT_EXPIRES_IN
+        value: 1d
       - key: ADMIN_EMAIL
-        value: admin@uam.com
+        value: mutavakkilukhan4428@gmail.com
       - key: ADMIN_NAME
-        value: System Admin
+        value: Mutavakkil
       - key: ADMIN_PASSWORD
-        value: Admin@UAM2024
+        value: Muttu@123
       - key: MANAGER_EMAIL
-        value: manager@uam.com
+        value: mutavakkilmuttu@gmail.com
       - key: MANAGER_NAME
-        value: System Manager
+        value: Mr.khan
       - key: MANAGER_PASSWORD
-        value: Manager@UAM2024
+        value: Muttu@123
       - key: PORT
-        value: 3000
-      - key: ALLOWED_ORIGINS
-        value: https://user-management-system-frontend.onrender.com 
+        value: 3000 

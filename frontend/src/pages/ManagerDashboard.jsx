@@ -16,6 +16,8 @@ import {
   Box,
   CssBaseline,
   Tooltip,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import axios from 'axios';
 import { useAuth } from '../contexts/AuthContext';
@@ -28,6 +30,8 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3000
 const ManagerDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
   const { user, logout } = useAuth();
 
@@ -42,15 +46,20 @@ const ManagerDashboard = () => {
 
   const fetchRequests = async () => {
     try {
+      setLoading(true);
+      setError('');
       const response = await axios.get(`${API_BASE_URL}/api/access-request`);
       setRequests(response.data);
     } catch (error) {
-      setError('Error fetching access requests');
+      setError(error.response?.data?.message || 'Error fetching access requests');
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdateRequest = async (requestId, status) => {
     try {
+      setUpdating(true);
       await axios.patch(`${API_BASE_URL}/api/access-request/${requestId}`, {
         status,
       });
@@ -61,7 +70,9 @@ const ManagerDashboard = () => {
         )
       );
     } catch (error) {
-      setError('Error updating access request');
+      setError(error.response?.data?.message || 'Error updating access request');
+    } finally {
+      setUpdating(false);
     }
   };
 
@@ -70,17 +81,30 @@ const ManagerDashboard = () => {
     navigate('/login');
   };
 
+  if (loading) {
+    return (
+      <Box
+        sx={{
+          minHeight: '100vh',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
+        }}
+      >
+        <CircularProgress size={60} sx={{ color: 'white' }} />
+      </Box>
+    );
+  }
+
   return (
     <Box
       sx={{
         minHeight: '100vh',
         width: '100vw',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'stretch',
-        justifyContent: 'flex-start',
         background: 'linear-gradient(135deg, #1a237e 0%, #0d47a1 100%)',
         zIndex: 0,
+        overflowX: 'hidden',
       }}
     >
       <CssBaseline />
@@ -123,21 +147,20 @@ const ManagerDashboard = () => {
             Access Requests
           </Typography>
           {error && (
-            <Typography color="error" gutterBottom>
+            <Alert severity="error" sx={{ mb: 2 }}>
               {error}
-            </Typography>
+            </Alert>
           )}
-          <TableContainer component={Paper} sx={{ borderRadius: 4, boxShadow: 4 }}>
-            <Table sx={{ borderRadius: 4, overflow: 'hidden' }}>
+          <TableContainer component={Paper} sx={{ maxHeight: 'calc(100vh - 300px)', overflow: 'auto' }}>
+            <Table stickyHeader>
               <TableHead>
-                <TableRow sx={{ background: 'linear-gradient(90deg, #e3f2fd 0%, #bbdefb 100%)' }}>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>User</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Software</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Access Type</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Reason</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Status</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Date</TableCell>
-                  <TableCell sx={{ fontWeight: 'bold', color: '#0d47a1', py: 2 }}>Actions</TableCell>
+                <TableRow>
+                  <TableCell>User</TableCell>
+                  <TableCell>Software</TableCell>
+                  <TableCell>Access Type</TableCell>
+                  <TableCell>Reason</TableCell>
+                  <TableCell>Status</TableCell>
+                  <TableCell>Actions</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -174,25 +197,28 @@ const ManagerDashboard = () => {
                         </span>
                       )}
                     </TableCell>
-                    <TableCell sx={{ py: 2 }}>{new Date(request.timestamp).toLocaleDateString()}</TableCell>
                     <TableCell sx={{ py: 2 }}>
                       {request.status === 'pending' && (
-                        <Box>
+                        <Box sx={{ display: 'flex', gap: 1 }}>
                           <Button
-                            color="success"
                             variant="contained"
-                            sx={{ mr: 1, fontWeight: 'bold', borderRadius: 2, px: 2, boxShadow: 2 }}
+                            color="success"
+                            size="small"
+                            disabled={updating}
                             onClick={() => handleUpdateRequest(request.id, 'approved')}
+                            sx={{ minWidth: 100 }}
                           >
-                            Approve
+                            {updating ? <CircularProgress size={20} /> : 'Approve'}
                           </Button>
                           <Button
-                            color="error"
                             variant="contained"
-                            sx={{ fontWeight: 'bold', borderRadius: 2, px: 2, boxShadow: 2 }}
+                            color="error"
+                            size="small"
+                            disabled={updating}
                             onClick={() => handleUpdateRequest(request.id, 'rejected')}
+                            sx={{ minWidth: 100 }}
                           >
-                            Reject
+                            {updating ? <CircularProgress size={20} /> : 'Reject'}
                           </Button>
                         </Box>
                       )}

@@ -12,9 +12,9 @@ services:
       - key: DB_PORT
         value: 5432
       - key: DB_DATABASE
-        value: postgres_backend_kfwx
+        value: postgres_backend_hkvq
       - key: DB_USERNAME
-        value: postgres_backend_kfwx_user
+        value: postgres_backend_hkvq_user
       - key: DB_PASSWORD
         value: jXs9PRKrNQeAXbtcQE1lYwDDw7cTTVli
       - key: JWT_SECRET
